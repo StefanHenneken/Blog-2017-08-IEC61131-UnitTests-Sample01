@@ -1,0 +1,56 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4022.7">
+  <POU Name="FB_Foo" Id="{a8ccd82f-f274-45d9-9094-23464f729098}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_Foo
+VAR_INPUT
+	bSwitch					:	BOOL;
+	bOff					:	BOOL;
+	tDuration				:	TIME := T#10S;
+END_VAR
+VAR_OUTPUT
+	bOut					:	BOOL;
+END_VAR
+VAR
+	tonDuration				:	TON;
+	rtrigSwitch				:	R_TRIG;
+	rtrigOff				:	R_TRIG;
+	bStart					:	BOOL;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[rtrigSwitch(CLK := bSwitch);
+IF (rtrigSwitch.Q) THEN
+	bStart := TRUE;
+	bOut := TRUE;
+	tonDuration(IN := FALSE);
+END_IF
+
+rtrigOff(CLK := bOff);
+IF (rtrigOff.Q) THEN
+	bStart := FALSE;
+	bOut := FALSE;
+	tonDuration(IN := FALSE);
+END_IF
+
+IF (bStart) THEN
+	tonDuration(IN := TRUE, PT := tDuration);
+	IF (tonDuration.Q) THEN
+		tonDuration(IN := FALSE);
+		bOut := FALSE;
+		bStart := FALSE;
+	END_IF
+END_IF
+]]></ST>
+    </Implementation>
+    <LineIds Name="FB_Foo">
+      <LineId Id="29" Count="3" />
+      <LineId Id="36" Count="0" />
+      <LineId Id="39" Count="5" />
+      <LineId Id="46" Count="0" />
+      <LineId Id="49" Count="5" />
+      <LineId Id="57" Count="1" />
+      <LineId Id="60" Count="1" />
+      <LineId Id="83" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

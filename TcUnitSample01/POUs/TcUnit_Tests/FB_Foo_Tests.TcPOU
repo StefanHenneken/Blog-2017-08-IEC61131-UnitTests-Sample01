@@ -1,0 +1,170 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4022.7">
+  <POU Name="FB_Foo_Tests" Id="{1363abe5-99d7-4727-a95b-cea7384836fa}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_Foo_Tests
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+	bError			: BOOL;
+	bDone			: BOOL;
+END_VAR
+VAR
+	Assert			: FB_ASSERT('FB_Foo');
+	tonDelay		: TON;	
+	fbFoo_0100		: FB_Foo;
+	fbFoo_0200		: FB_Foo;
+	fbFoo_0300		: FB_Foo;
+	fbFoo_0400		: FB_Foo;	
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[CASE Assert.State OF
+{region "start"}
+	16#0000:
+		Assert.AbortAfterFail := FALSE;
+		Assert.MultipleLog := FALSE;	
+		bError := FALSE;
+		bDone := FALSE;	
+		Assert.State := 16#0100;
+{endregion}
+
+{region "Switch_RisingEdgeAndDuration1s_OutIsTrueFor1s"}
+	16#0100:
+		fbFoo_0100(bSwitch := TRUE, tDuration := T#1S);
+		Assert.AreEqualBOOL(TRUE, fbFoo_0100.bOut, 'Switch_RisingEdgeAndDuration1s_OutIsTrueFor1s');
+		tonDelay(IN := TRUE, PT := T#900MS);
+		IF (tonDelay.Q) THEN
+			tonDelay(IN := FALSE);
+			Assert.State := 16#0200;
+		END_IF	
+{endregion}
+
+{region "Switch_RisingEdgeAndDuration1s_OutIsFalseAfter1100ms"}
+	16#0200:
+		fbFoo_0200(bSwitch := TRUE, tDuration := T#1S);
+		tonDelay(IN := TRUE, PT := T#1100MS);
+		IF (tonDelay.Q) THEN
+			tonDelay(IN := FALSE);
+			Assert.AreEqualBOOL(FALSE, fbFoo_0200.bOut, 'Switch_RisingEdgeAndDuration1s_OutIsFalseAfter1100ms');
+			Assert.State := 16#0300;
+		END_IF	
+{endregion}
+
+{region "Switch_RetriggerSwitch_OutKeepsTrue"}
+	16#0300:
+		fbFoo_0300(bSwitch := TRUE, tDuration := T#500MS);
+		Assert.AreEqualBOOL(TRUE, fbFoo_0300.bOut, 'Switch_RetriggerSwitch_OutKeepsTrue');
+		tonDelay(IN := TRUE, PT := T#400MS);
+		IF (tonDelay.Q) THEN
+			tonDelay(IN := FALSE);
+			fbFoo_0300(bSwitch := FALSE);
+			Assert.State := 16#0310;			
+		END_IF		
+		
+	16#0310:
+		fbFoo_0300(bSwitch := TRUE, tDuration := T#500MS);
+		Assert.AreEqualBOOL(TRUE, fbFoo_0300.bOut, 'Switch_RetriggerSwitch_OutKeepsTrue');
+		tonDelay(IN := TRUE, PT := T#400MS);
+		IF (tonDelay.Q) THEN
+			tonDelay(IN := FALSE);
+			Assert.State := 16#0400;
+		END_IF
+{endregion}
+
+{region "Off_RisingEdgeAndOutIsTrue_OutIsFalse"}
+	16#0400:
+		fbFoo_0400(bSwitch := TRUE, tDuration := T#200MS);
+		Assert.AreEqualBOOL(TRUE, fbFoo_0400.bOut, 'Off_RisingEdgeAndOutIsTrue_OutIsFalse');
+		tonDelay(IN := TRUE, PT := T#100MS);
+		IF (tonDelay.Q) THEN
+			tonDelay(IN := FALSE);
+			fbFoo_0400(bOff := TRUE);
+			Assert.AreEqualBOOL(FALSE, fbFoo_0400.bOut, 'Off_RisingEdgeAndOutIsTrue_OutIsFalse');
+			Assert.State := 16#FF00;
+		END_IF
+{endregion}
+		
+{region "done"}
+	16#FF00:
+		Assert.PrintPassed('Done');
+		Assert.State := 16#FF10;
+
+	16#FF10:
+		bDone := TRUE;
+		
+{endregion}
+
+{region "error"}
+	16#FFFF:
+		bError := TRUE;
+{endregion}
+		
+	ELSE
+		Assert.StateMachineError();
+END_CASE
+]]></ST>
+    </Implementation>
+    <LineIds Name="FB_Foo_Tests">
+      <LineId Id="10" Count="0" />
+      <LineId Id="134" Count="0" />
+      <LineId Id="11" Count="2" />
+      <LineId Id="78" Count="1" />
+      <LineId Id="18" Count="0" />
+      <LineId Id="135" Count="0" />
+      <LineId Id="108" Count="0" />
+      <LineId Id="19" Count="1" />
+      <LineId Id="90" Count="0" />
+      <LineId Id="123" Count="0" />
+      <LineId Id="91" Count="0" />
+      <LineId Id="96" Count="1" />
+      <LineId Id="122" Count="0" />
+      <LineId Id="87" Count="0" />
+      <LineId Id="27" Count="0" />
+      <LineId Id="114" Count="0" />
+      <LineId Id="109" Count="0" />
+      <LineId Id="28" Count="0" />
+      <LineId Id="125" Count="0" />
+      <LineId Id="127" Count="2" />
+      <LineId Id="132" Count="0" />
+      <LineId Id="130" Count="1" />
+      <LineId Id="116" Count="0" />
+      <LineId Id="118" Count="0" />
+      <LineId Id="35" Count="1" />
+      <LineId Id="138" Count="0" />
+      <LineId Id="156" Count="0" />
+      <LineId Id="139" Count="2" />
+      <LineId Id="147" Count="0" />
+      <LineId Id="155" Count="0" />
+      <LineId Id="144" Count="2" />
+      <LineId Id="149" Count="0" />
+      <LineId Id="157" Count="0" />
+      <LineId Id="150" Count="2" />
+      <LineId Id="158" Count="0" />
+      <LineId Id="154" Count="0" />
+      <LineId Id="42" Count="0" />
+      <LineId Id="119" Count="0" />
+      <LineId Id="115" Count="0" />
+      <LineId Id="43" Count="0" />
+      <LineId Id="162" Count="5" />
+      <LineId Id="171" Count="0" />
+      <LineId Id="168" Count="1" />
+      <LineId Id="117" Count="0" />
+      <LineId Id="191" Count="0" />
+      <LineId Id="49" Count="0" />
+      <LineId Id="80" Count="0" />
+      <LineId Id="227" Count="1" />
+      <LineId Id="234" Count="0" />
+      <LineId Id="230" Count="0" />
+      <LineId Id="233" Count="0" />
+      <LineId Id="229" Count="0" />
+      <LineId Id="112" Count="0" />
+      <LineId Id="111" Count="0" />
+      <LineId Id="82" Count="1" />
+      <LineId Id="54" Count="0" />
+      <LineId Id="84" Count="0" />
+      <LineId Id="113" Count="0" />
+      <LineId Id="55" Count="2" />
+      <LineId Id="9" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>
